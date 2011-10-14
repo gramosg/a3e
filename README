@@ -1,0 +1,8 @@
+a3e - a3e awesome ARM emulator
+------------------------------
+
+Pass it a file in raw binary format to emulate its execution.
+
+If you already have an ARM executable (ELF) you can generate a raw binary from
+it using objcopy from binutils. Example using NDK binutils:
+	$ arm-linux-androideabi-objcopy -O binary file.elf file.bin
