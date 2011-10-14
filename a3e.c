@@ -29,7 +29,19 @@
 #include "memory.h"
 #include "exec.h"
 #include "parser.h"
+#include "pipeline.h"
 
+
+static void warning(char *s)
+{
+	fprintf(stderr, "WARNING: %s\n", s);
+}
+
+static void error(char *s)
+{
+	fprintf(stderr, "ERROR: %s\n", s);
+	exit(-1);
+}
 
 static void usage(char *progname)
 {
@@ -39,102 +51,62 @@ static void usage(char *progname)
 
 int main(int argc, char** argv)
 {
+	struct instruction cur;
 	int codefile;
 	u16 codelen;
-
 	void *map;
-	struct instruction cur;
+
+	int exec_value = NONE;
+	int instr_n = 0;
+
 
 	if (argc < 2)
 		usage(argv[0]);
 
-	codefile = open(argv[1], O_RDONLY);
+	if ((codefile = open(argv[1], O_RDONLY)) == -1)
+		error("file does not exist or does not have priviledges");
 
 	if ((codelen = lseek(codefile, 0, SEEK_END)) % 4 != 0) {
-		printf("WARNING: file not word-aligned, filling with zeros ('\\0')\n");
+		warning("file not word-aligned, filling with zeros ('\\0')");
 		codelen = codelen - (codelen % 4) + 4;
 	}
 
 	printf("Memory size: %d bytes\n", MEMSIZE);
-	if (MEMSIZE < codelen + 4) {
-		fprintf(stderr, "ERROR: Not enough memory\n");
-		return -1;
-	}
+	if (MEMSIZE < codelen + 4)
+		error("not enough memory");
 
 	map = (char *)mmap(NULL, codelen, PROT_READ, MAP_SHARED, codefile, 0);
-	memcpy(m, map, codelen);			/* copy file into memory */
+	memcpy(m, map, codelen);			/* copy code from file into memory */
 	memset(m + codelen, 0xff, 4);		/* put .exit at EOF (0xffffffff) */
 
 	munmap(map, codelen);
 	close(codefile);
 
 	printf("\nGo go go...\n");
-	while (1) {
-		memcpy(cur.val._byte, m+(*pc), 4);
+	while (exec_value != BYE) {
+		if (pipe_ready()) {
+			memcpy(cur.val._byte, m + cur_inst(), 4);
 
-		cur.cond = get_u32(cur.val._u32, 28, 4);
-
-		if (get_u32(cur.val._u32, 0, 32) == 0xffffffff) {
-			cur.type = BYE;
+			parse(&cur);
 			printi(&cur);
-			show_status();
-			return 0;
+			exec_value = exec(&cur);
+
+			instr_n += 1;
+		} else {
+			waiting_pipe();
+			exec_value = NONE;
 		}
 
-		if (get_u32(cur.val._u32, 25, 3) == 0x5)
-			cur.type = B;
-		else if (get_u32(cur.val._u32, 24, 4) == 0xf)
-			cur.type = SWI;
-		else if (get_u32(cur.val._u32, 26, 2) == 0x1)
-			cur.type = LDB;
-		else if (get_u32(cur.val._u32, 22, 6) == 0x0)
-			cur.type = MUL;
-		else if (get_u32(cur.val._u32, 23, 5) == 0x1)
-			cur.type = LML;
-		else if (get_u32(cur.val._u32, 23, 5) == 0x2)
-			cur.type = SWP;
-		else if (get_u32(cur.val._u32, 25, 3) == 0x4)
-			cur.type = LDM;
-		else if (get_u32(cur.val._u32, 24, 4) == 0x1)
-			cur.type = BXC;
-		else if (get_u32(cur.val._u32, 26, 2) == 0x0)
-			cur.type = MOV;
-		else if (get_u32(cur.val._u32, 24, 4) == 0xe)
-			cur.type = COP;
-		else
-			cur.type = UNK;
-
-		// Show instruction info
-//		parse(&cur);
-		printi(&cur);
-
-		// Execute instruction
-		switch (cur.type) {
-		case MOV:
-			exec_mov(&cur);
-			break;
-		case SWI:
-			exec_swi(&cur);
-			break;
+		/* Some instructions should not add 4 to pc once executed */
+		switch (exec_value) {
 		case B:
-//			*pc += ...;
 			break;
-		case BYE:
-		case UNK:
-			break;
-		case MUL:
-		case LML:
-		case SWP:
-		case LDB:
-		case LDM:
-		case BXC:
-		case COP:
-			break;
+		default:
+			next_inst();
 		}
-
-		*pc += 4;
 	}
 
+	printf("\nExecution finished. Total instructions: %d\n", instr_n-1);
 	show_status();
 
 	return 0;

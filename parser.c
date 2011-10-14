@@ -34,7 +34,7 @@ void printi(struct instruction *inst)
 		printf("swi\t%x\n", get_s32(inst->val._u32, 0, 24));
 		break;
 	case B:
-		printf("b\t[pc+#%d]\n", get_s32(inst->val._u32, 0, 24));
+		printf("b\t[pc + #%d]\n", get_s32(inst->val._u32, 0, 24));
 		break;
 	case BYE:
 		printf(".exit\n");
@@ -49,9 +49,46 @@ void printi(struct instruction *inst)
 	case LDM:
 	case BXC:
 	case COP:
+	case NONE:
 		printf("Instruction (%d) not implemented\n", inst->type);
 		break;
 	}
+}
 
+inline void parse_type(struct instruction *inst)
+{
+		if (inst->val._u32 == 0xffffffff)
+			inst->type = BYE;
+		else if (get_u32(inst->val._u32, 25, 3) == 0x5)
+			inst->type = B;
+		else if (get_u32(inst->val._u32, 24, 4) == 0xf)
+			inst->type = SWI;
+		else if (get_u32(inst->val._u32, 26, 2) == 0x1)
+			inst->type = LDB;
+		else if (get_u32(inst->val._u32, 22, 6) == 0x0)
+			inst->type = MUL;
+		else if (get_u32(inst->val._u32, 23, 5) == 0x1)
+			inst->type = LML;
+		else if (get_u32(inst->val._u32, 23, 5) == 0x2)
+			inst->type = SWP;
+		else if (get_u32(inst->val._u32, 25, 3) == 0x4)
+			inst->type = LDM;
+		else if (get_u32(inst->val._u32, 24, 4) == 0x1)
+			inst->type = BXC;
+		else if (get_u32(inst->val._u32, 26, 2) == 0x0)
+			inst->type = MOV;
+		else if (get_u32(inst->val._u32, 24, 4) == 0xe)
+			inst->type = COP;
+		else
+			inst->type = UNK;
+}
+
+void parse(struct instruction *inst)
+{
+
+	/* In every instruction, condition is coded in the last 4 bits */
+	inst->cond = get_u32(inst->val._u32, 28, 4);
+
+	parse_type(inst);
 }
 

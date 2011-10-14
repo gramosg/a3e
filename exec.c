@@ -21,8 +21,9 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <unistd.h>
-#include "types.h"
 #include "memory.h"
+#include "pipeline.h"
+#include "types.h"
 
 void exec_mov(struct instruction *inst)
 {
@@ -38,5 +39,34 @@ void exec_swi(struct instruction *inst)
 	} else {
 		fprintf(stderr, "Syscall %x not implemented\n", nr);
 	}
+}
+
+int exec(struct instruction *inst)
+{
+	switch (inst->type) {
+	case MOV:
+		exec_mov(inst);
+		return MOV;
+	case SWI:
+		exec_swi(inst);
+		return SWI;
+	case B:
+		b(get_s32(inst->val._u32, 0, 24));
+		return B;
+	case BYE:
+		return BYE;
+	case UNK:
+	case MUL:
+	case LML:
+	case SWP:
+	case LDB:
+	case LDM:
+	case BXC:
+	case COP:
+	case NONE:
+		break;
+	}
+
+	return -1;
 }
 

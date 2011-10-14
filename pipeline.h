@@ -18,13 +18,19 @@
  * along with a3e.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _PARSER_H
-#define _PARSER_H
+#ifndef _PIPELINE_H
+#define _PIPELINE_H
 
 
-extern void printi(struct instruction *inst);
-extern void parse(struct instruction *inst);
+#include "types.h"
+
+extern void waiting_pipe(void);
+extern void jmp(u32 new_pc);
+extern void b(u32 offset);
+extern void next_inst(void);
+extern u32 cur_inst(void);
+extern int pipe_ready(void);
 
 
-#endif	/* _PARSER_H */
+#endif	/* _PIPELINE_H */
 

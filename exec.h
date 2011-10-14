@@ -24,8 +24,9 @@
 
 #include "types.h"
 
-extern void exec_mov(struct instruction *);
-extern void exec_swi(struct instruction *);
+//extern void exec_mov(struct instruction *);
+//extern void exec_swi(struct instruction *);
+extern int exec(struct instruction *);
 
 
 #endif	/* _EXEC_H */

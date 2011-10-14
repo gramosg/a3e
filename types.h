@@ -31,7 +31,7 @@ typedef int16_t s16;
 typedef int8_t s8;
 
 enum inst_type {
-	MOV,MUL,LML,SWP,LDB,LDM,B,BXC,COP,SWI,UNK,BYE
+	MOV,MUL,LML,SWP,LDB,LDM,B,BXC,COP,SWI,UNK,BYE,NONE
 };
 
 struct instruction {
