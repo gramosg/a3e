@@ -56,16 +56,17 @@ int main(int argc, char** argv)
 	u16 codelen;
 	void *map;
 
-	int exec_value = NONE;
 	int instr_n = 0;
 
 
 	if (argc < 2)
 		usage(argv[0]);
 
+	/* Open source file */
 	if ((codefile = open(argv[1], O_RDONLY)) == -1)
 		error("file does not exist or does not have priviledges");
 
+	/* Check length */
 	if ((codelen = lseek(codefile, 0, SEEK_END)) % 4 != 0) {
 		warning("file not word-aligned, filling with zeros ('\\0')");
 		codelen = codelen - (codelen % 4) + 4;
@@ -83,27 +84,26 @@ int main(int argc, char** argv)
 	close(codefile);
 
 	printf("\nGo go go...\n");
-	while (exec_value != BYE) {
+	while (1) {
+
+		/* If pipe is ready to execute an instruction, do it */
 		if (pipe_ready()) {
-			memcpy(cur.val._byte, m + cur_inst(), 4);
+			memcpy(cur.val._byte, m + cur_inst(), 4);	/* "fetch" */
+			parse(&cur);				/* "decode" */
+			printi(&cur);				/* show instruction graphically */
+			exec(&cur);					/* "execute" */
 
-			parse(&cur);
-			printi(&cur);
-			exec_value = exec(&cur);
-
-			instr_n += 1;
+			instr_n += 1;	/* Executed one more instruction */
 		} else {
+			cur.type = NONE;
 			waiting_pipe();
-			exec_value = NONE;
 		}
 
 		/* Some instructions should not add 4 to pc once executed */
-		switch (exec_value) {
-		case B:
+		if (cur.type == BYE)
 			break;
-		default:
+		else if (cur.type != B)
 			next_inst();
-		}
 	}
 
 	printf("\nExecution finished. Total instructions: %d\n", instr_n-1);

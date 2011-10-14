@@ -23,7 +23,7 @@
 
 void printi(struct instruction *inst)
 {
-	printf("%02x %02x %02x %02x\t", inst->val._byte[0], inst->val._byte[1],
+	printf("%02x %02x %02x %02x\t\t", inst->val._byte[0], inst->val._byte[1],
 			inst->val._byte[2], inst->val._byte[3]);
 	switch (inst->type) {
 	case MOV:

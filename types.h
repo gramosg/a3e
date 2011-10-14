@@ -44,6 +44,7 @@ struct instruction {
 	u8 cond;
 };
 
+
 enum mov_type {
 	add,adc,sub,sbc,rsb,rsc,cmp,cmn,tst,teq,and,eor,orr,bic,mov,mvn,lsl,lsr,
 	ror,rol,rrx
@@ -53,20 +54,30 @@ struct mov_info {
 	enum mov_type op;
 };
 
-inline u32 get_u32(u32 word, u8 from, u8 size)
+
+/*
+ * Returns the 32-bit unsigned value of bits [from,from+size) of base.
+ *
+ * This is done by shifting right base 'from' times and then masking the bits
+ * at the left of 'size'.
+ */
+inline u32 get_u32(u32 base, u8 from, u8 size)
 {
-	return (word >> from) & ~((~0) << size);
+	return (base >> from) & ~((~0) << size);
 }
 
-inline s32 get_s32(u32 val, u8 from, u8 size)
+/*
+ * Returns the 32-bit signed value of bits [from,from+size) of base.
+ *
+ * If the value's most significant bit is 1, sign-extend the value by OR'ing
+ * with 1 all bits at the left of it. Else, call get_u32().
+ */
+inline s32 get_s32(u32 base, u8 from, u8 size)
 {
-	s32 ret = val >> from;
-	if (ret & (1 << (size-1)))
-		ret |= ((~0) << size);
+	if (base & (1 << (from+size-1)))
+		return (base >> from) | (~0) << size;
 	else
-		ret &= ~((~0) << size);
-
-	return ret;
+		return get_u32(base, from, size);
 }
 
 

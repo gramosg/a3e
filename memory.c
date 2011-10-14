@@ -22,15 +22,17 @@
 #include "types.h"
 #include "memory.h"
 
+#define REG_N	16	/* Size of register bank */
+
 u8 m[MEMSIZE];		/* Memory map */
-u32 r[16];			/* Registers */
+u32 r[REG_N];		/* Registers */
 u32 *pc = &r[15];	/* Program counter (r15) */
 
 void reg_dump(void)
 {
 	int i;
 
-	for (i = 0; i <= 15; i++) {
+	for (i = 0; i < REG_N; i++) {
 		printf("\tr%02d=0x%08x", i, r[i]);
 		if ((i+1) % 4 == 0)
 			putchar('\n');
