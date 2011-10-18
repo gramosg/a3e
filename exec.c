@@ -21,16 +21,16 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <unistd.h>
+#include "types.h"
 #include "memory.h"
 #include "pipeline.h"
-#include "types.h"
 
-inline void exec_mov(struct instruction *inst)
+void exec_mov(struct instruction *inst)
 {
 	r[get_u32(inst->val._u32, 8, 8)] = get_u32(inst->val._u32, 0, 8);
 }
 
-inline void exec_swi(struct instruction *inst)
+void exec_swi(struct instruction *inst)
 {
 	int nr = get_s32(inst->val._u32, 0, 24);
 	if (nr == 0) {
@@ -41,7 +41,7 @@ inline void exec_swi(struct instruction *inst)
 	}
 }
 
-inline void exec_b(struct instruction *inst)
+void exec_b(struct instruction *inst)
 {
 	b(get_s32(inst->val._u32, 0, 24));
 }

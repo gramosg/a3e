@@ -1,9 +1,9 @@
 CC = gcc
 #CC = $(ARMCC)
-CFLAGS = -Wall -Wextra -std=c99 -pedantic -O3
+CFLAGS = -Wall -Wextra -O3 -std=gnu99 -pedantic
 LDFLAGS =
 TARGET = a3e
-OBJECTS = $(TARGET).o exec.o memory.o parser.o pipeline.o
+OBJECTS = $(TARGET).o exec.o memory.o parser.o pipeline.o types.o
 PREFIX=/usr/local/bin
 
 %.o: %.c

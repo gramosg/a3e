@@ -55,7 +55,7 @@ void printi(struct instruction *inst)
 	}
 }
 
-inline void parse_type(struct instruction *inst)
+void parse_type(struct instruction *inst)
 {
 		if (inst->val._u32 == 0xffffffff)
 			inst->type = BYE;

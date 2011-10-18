@@ -22,12 +22,12 @@
 #include "types.h"
 #include "memory.h"
 
+#define STAGES	3
+
 /*
- * pipe[0] -> Instruction currently being fetched
- * pipe[1] -> Instruction currently being decoded
- * pipe[2] -> Instruction currently being executed
+ * executing -> Instruction currently being executed
  */
-u32 pipe[3];
+u32 executing;
 
 /*
  * stage 0 -> Pipeline is fetching but not decoding nor executing
@@ -53,9 +53,9 @@ void waiting_pipe(void)
  * This is done to prevent the main program from executing invalid instructions
  * when a jump/branch has been taken or the program is first run
  */
-inline void stage_up(void)
+void stage_up(void)
 {
-	if (stage < 2)
+	if (stage < STAGES-1)
 		stage++;
 }
 
@@ -63,11 +63,9 @@ inline void stage_up(void)
 /*
  * Set what instruction is pointing each of the pipeline stages
  */
-inline void update_pipe(void)
+void update_pipe(void)
 {
-	pipe[0] = *pc;
-//	pipe[1] = *pc-4;
-	pipe[2] = *pc-8;
+	executing = *pc-8;
 }
 
 
@@ -107,7 +105,7 @@ void next_inst(void)
  */
 u32 cur_inst(void)
 {
-	return pipe[2];
+	return executing;
 }
 
 
@@ -116,6 +114,6 @@ u32 cur_inst(void)
  */
 int pipe_ready(void)
 {
-	return stage == 2;
+	return stage == STAGES-1;
 }
 
