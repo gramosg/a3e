@@ -51,12 +51,15 @@ int exec(struct instruction *inst)
 	switch (inst->type) {
 	case MOV:
 		exec_mov(inst);
+		printf("\t--> EXECUTED\n");
 		return MOV;
 	case SWI:
 		exec_swi(inst);
+		printf("\t--> EXECUTED\n");
 		return SWI;
 	case B:
 		exec_b(inst);
+		printf("\t--> EXECUTED\n");
 		return B;
 	case UNK:
 	case MUL:

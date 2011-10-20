@@ -1,6 +1,6 @@
 CC = gcc
 #CC = $(ARMCC)
-CFLAGS = -Wall -Wextra -O3 -std=gnu99 -pedantic
+CFLAGS = -Wall -Wextra -std=c99 -pedantic -O3
 LDFLAGS =
 TARGET = a3e
 OBJECTS = $(TARGET).o exec.o memory.o parser.o pipeline.o types.o

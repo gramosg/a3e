@@ -83,12 +83,16 @@ void parse_type(struct instruction *inst)
 			inst->type = UNK;
 }
 
+void parse_cond(struct instruction *inst)
+{
+	/* In every instruction, condition is coded in the last 4 bits */
+	inst->cond = get_u32(inst->val._u32, 28, 4);
+}
+
 void parse(struct instruction *inst)
 {
 
-	/* In every instruction, condition is coded in the last 4 bits */
-	inst->cond = get_u32(inst->val._u32, 28, 4);
-
+	parse_cond(inst);
 	parse_type(inst);
 }
 

@@ -20,7 +20,6 @@
 
 #include "types.h"
 
-
 /*
  * Returns the 32-bit unsigned value of bits [from,from+size) of base.
  *
@@ -45,3 +44,4 @@ s32 get_s32(u32 base, u8 from, u8 size)
 	else
 		return get_u32(base, from, size);
 }
+
