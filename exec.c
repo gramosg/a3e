@@ -19,6 +19,7 @@
  */
 
 #define _GNU_SOURCE
+#include <libdisarm/disarm.h>
 #include <stdio.h>
 #include <unistd.h>
 #include "types.h"
@@ -27,12 +28,12 @@
 
 void exec_mov(struct instruction *inst)
 {
-	r[get_u32(inst->val._u32, 8, 8)] = get_u32(inst->val._u32, 0, 8);
+	r[inst->args.data_imm.rd] = inst->args.data_imm.imm;
 }
 
 void exec_swi(struct instruction *inst)
 {
-	int nr = get_s32(inst->val._u32, 0, 24);
+	int nr = inst->args.swi.imm;
 	if (nr == 0) {
 		r[1] = syscall(r[7], r[0], r[1], r[2], r[3], r[4]);
 		printf("\t--> returned %d\n", r[1]);
@@ -41,40 +42,31 @@ void exec_swi(struct instruction *inst)
 	}
 }
 
-void exec_b(struct instruction *inst)
+void exec_bl(struct instruction *inst)
 {
-	b(get_s32(inst->val._u32, 0, 24));
+//	b(get_s32(inst->val._u32, 0, 24));
+	b(inst->args.bl.off);
 }
 
-int exec(struct instruction *inst)
+void exec(struct instruction *inst)
 {
-	switch (inst->type) {
-	case MOV:
+	if (inst->val._u32 == 0xffffffff)
+		return;
+	switch (inst->group) {
+	case DA_GROUP_DATA_IMM:
 		exec_mov(inst);
-		printf("\t--> EXECUTED\n");
-		return MOV;
-	case SWI:
-		exec_swi(inst);
-		printf("\t--> EXECUTED\n");
-		return SWI;
-	case B:
-		exec_b(inst);
-		printf("\t--> EXECUTED\n");
-		return B;
-	case UNK:
-	case MUL:
-	case LML:
-	case SWP:
-	case LDB:
-	case LDM:
-	case BXC:
-	case COP:
-	case NONE:
 		break;
-	case BYE:
-		return BYE;
+	case DA_GROUP_SWI:
+		exec_swi(inst);
+		break;
+	case DA_GROUP_BL:
+		exec_bl(inst);
+		break;
+	default:
+		printf("\t--> NOT EXECUTED\n");
+		break;
 	}
 
-	return -1;
+	return;
 }
 
