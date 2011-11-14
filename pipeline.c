@@ -39,7 +39,7 @@ int stage = 0;
  * This is done to prevent the main program from executing invalid instructions
  * when a jump/branch has been taken or the program is first run
  */
-void stage_up(void)
+void do_cycle(void)
 {
 	*pc += 4;
 	if (stage < STAGES-1)
@@ -53,8 +53,7 @@ void stage_up(void)
  */
 void wait_pipe(void)
 {
-	fprintf(stdout, "\t(waiting for pipeline: current stage %d)\n", stage);
-	stage_up();
+	fprintf(stdout, "\t(waiting for pipeline: pc %d stage %d)\n", *pc, stage);
 }
 
 
@@ -73,6 +72,7 @@ void wait_pipe(void)
 void jmp(u32 new_pc)
 {
 	*pc = new_pc;
+	printf("pc is rait nao %d\n", *pc);
 	stage = 0;
 }
 

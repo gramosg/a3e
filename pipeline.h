@@ -28,7 +28,7 @@ extern void wait_pipe(void);
 extern void jmp(u32 new_pc);
 extern void b(u32 offset);
 //extern void next_inst(void);
-extern void stage_up(void);
+extern void do_cycle(void);
 extern u32 cur_inst(void);
 extern int pipe_ready(void);
 

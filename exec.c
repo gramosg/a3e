@@ -26,14 +26,34 @@
 #include "memory.h"
 #include "pipeline.h"
 
-void exec_mov(struct instruction *inst)
+inline void not_implemented(char *where, da_data_op_t op)
 {
-	r[inst->args.data_imm.rd] = inst->args.data_imm.imm;
+	printf("Op #%d not implemented in %s\n", op, where);
 }
 
-void exec_swi(struct instruction *inst)
+void exec_data_imm(da_args_data_imm_t *args)
 {
-	int nr = inst->args.swi.imm;
+	if (args->op == DA_DATA_OP_MOV || args->op == DA_DATA_OP_MVN)
+		r[args->rd] = args->imm;
+	else
+		not_implemented("data_imm", args->op);
+}
+
+void exec_data_imm_sh(da_args_data_imm_sh_t *args)
+{
+//	printf("rd:%d rn:%d rm:%d sh:%d sha:%d\n", args->rd, args->rn, args->rm,
+//			args->sh, args->sha);
+	if (args->op == DA_DATA_OP_ADD)
+		r[args->rd] = r[args->rn] + r[args->rm];
+	else if (args->op == DA_DATA_OP_SUB)
+		r[args->rd] = r[args->rn] - r[args->rm];
+	else
+		not_implemented("data_imm_sh", args->op);
+}
+
+void exec_swi(da_args_swi_t *args)
+{
+	int nr = args->imm;
 	if (nr == 0) {
 		r[1] = syscall(r[7], r[0], r[1], r[2], r[3], r[4]);
 		printf("\t--> returned %d\n", r[1]);
@@ -42,25 +62,34 @@ void exec_swi(struct instruction *inst)
 	}
 }
 
-void exec_bl(struct instruction *inst)
+void exec_bl(da_args_bl_t *args)
 {
-//	b(get_s32(inst->val._u32, 0, 24));
-	b(inst->args.bl.off);
+	printf("offset: %d\n", args->off);
+	b(args->off);
 }
 
 void exec(struct instruction *inst)
 {
+	da_instr_args_t args = inst->args;
+
 	if (inst->val._u32 == 0xffffffff)
 		return;
 	switch (inst->group) {
 	case DA_GROUP_DATA_IMM:
-		exec_mov(inst);
+//		printf("Entering data_imm\n");
+		exec_data_imm(&args.data_imm);
 		break;
 	case DA_GROUP_SWI:
-		exec_swi(inst);
+//		printf("Entering swi\n");
+		exec_swi(&args.swi);
 		break;
 	case DA_GROUP_BL:
-		exec_bl(inst);
+//		printf("Entering group_bl\n");
+		exec_bl(&args.bl);
+		break;
+	case DA_GROUP_DATA_IMM_SH:
+//		printf("Entering data_imm_sh\n");
+		exec_data_imm_sh(&args.data_imm_sh);
 		break;
 	default:
 		printf("\t--> NOT EXECUTED\n");
