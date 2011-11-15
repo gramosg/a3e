@@ -65,7 +65,7 @@ int main(int argc, char** argv)
 	struct instruction cur;
 	struct sigaction act, oact;
 	int codefile;
-	int instr_n = 0;
+	int instrn = 0, cycles = 0;
 	u16 codelen;
 	void *map;
 
@@ -102,17 +102,19 @@ int main(int argc, char** argv)
 
 		/* If pipe is ready to execute an instruction, do it */
 		if (wait_pipe()) {
-			instr_n += 1;		/* Executing one more instruction */
 			memcpy(cur.val._byte, m + cur_inst(), 4);	/* "fetch" */
 			parse(&cur);	/* decode & print instruction */
 			exec(&cur);		/* "execute" */
+			instrn++;		/* Executing one more instruction */
 		}
+
+		cycles++;
 
 		if (cur.val._u32 == 0xffffffff)	// exit
 			break;
 	}
 
-	printf("\nExecution finished. Total instructions: %d\n", instr_n-1);
+	printf("\nExecution finished. Instructions: %d, cycles: %d\n", instrn-1, cycles-1);
 	show_status();
 
 	return 0;

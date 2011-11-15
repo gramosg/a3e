@@ -28,7 +28,7 @@
 
 inline void not_implemented(char *where, da_data_op_t op)
 {
-	printf("Op #%d not implemented in %s\n", op, where);
+	fprintf(stderr, "\tOp #%d not implemented in inst. type %s\n", op, where);
 }
 
 void exec_data_imm(da_args_data_imm_t *args)
