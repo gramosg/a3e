@@ -80,9 +80,12 @@ void jmp(u32 new_pc)
 /*
  * Adds 'offset' instructions to current pc
  */
-void b(u32 offset)
+void b(s32 offset)
 {
-	jmp(*pc + 4*offset);
+	da_addr_t off = da_instr_branch_target(offset, *pc);
+	printf("b: offset=%d(%x), *pc=%d(%x), off=%d(%x)\n", offset, offset, *pc, *pc, off, off);
+//	jmp(*pc + 4*offset);
+	jmp(off);
 }
 
 

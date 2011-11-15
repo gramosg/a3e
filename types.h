@@ -38,6 +38,7 @@ struct instruction {
 		u32 _u32;
 	} val;
 
+	da_cond_t cond;
 	da_group_t group;
 	da_instr_args_t args;
 };

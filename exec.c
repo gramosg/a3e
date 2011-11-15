@@ -64,7 +64,7 @@ void exec_swi(da_args_swi_t *args)
 
 void exec_bl(da_args_bl_t *args)
 {
-	printf("offset: %d\n", args->off);
+	printf("offset=%d(%x)\n", args->off, args->off);
 	b(args->off);
 }
 

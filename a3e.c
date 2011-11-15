@@ -114,8 +114,6 @@ int main(int argc, char** argv)
 
 		if (cur.val._u32 == 0xffffffff)	// exit
 			break;
-//		else if (cur.type != B)
-//			next_inst();
 	}
 
 	printf("\nExecution finished. Total instructions: %d\n", instr_n-1);

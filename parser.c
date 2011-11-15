@@ -38,6 +38,7 @@ void parse(struct instruction *inst)
 	da_instr_fprint(stdout, &i, &inst->args, 0);
 
 	inst->group = i.group;
+	inst->cond = da_instr_get_cond(&i);
 
 	putchar('\n');
 }
