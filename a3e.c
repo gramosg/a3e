@@ -20,6 +20,7 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <getopt.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,6 +33,9 @@
 #include "exec.h"
 #include "parser.h"
 #include "pipeline.h"
+
+#define LIM_I		0
+#define LIM_C		1
 
 
 static void warning(char *s)
@@ -64,18 +68,43 @@ int main(int argc, char** argv)
 {
 	struct instruction cur;
 	struct sigaction act, oact;
-	int codefile;
+	int codefile, arg;
 	int instrn = 0, cycles = 0;
 	u16 codelen;
 	void *map;
+	int limits[] = {-1, -1};
+
+	int opt = 0;
+	struct option options[] = {
+		{"version", no_argument, NULL, 'v'},
+		{"max-cycles", required_argument, NULL, 'c'},
+		{"max-inst", required_argument, NULL, 'i'},
+		{0, 0, 0, 0}
+	};
+
+
+	while (opt != -1) {
+		switch (opt = getopt_long(argc, argv, "vc:i:", options, NULL)) {
+		case -1:
+			break;
+		case 'i':
+			if ((arg = atoi(optarg)) >= 0)
+				limits[LIM_I] = arg;
+			break;
+		case 'c':
+			if ((arg = atoi(optarg)) >= 0)
+				limits[LIM_C] = arg;
+			break;
+		case 'v':
+		case '?':
+			usage(argv[0]);
+		}
+	}
 
 	act.sa_handler = segfault;
 
-	if (argc < 2)
-		usage(argv[0]);
-
 	/* Open source file */
-	if ((codefile = open(argv[1], O_RDONLY)) == -1)
+	if ((codefile = open(argv[argc-1], O_RDONLY)) == -1)
 		error("file does not exist or does not have priviledges");
 
 	/* Check length */
@@ -102,6 +131,8 @@ int main(int argc, char** argv)
 
 		/* If pipe is ready to execute an instruction, do it */
 		if (wait_pipe()) {
+			if (limits[LIM_I] != -1 && instrn >= limits[LIM_I])
+				break;
 			memcpy(cur.val._byte, m + cur_inst(), 4);	/* "fetch" */
 			parse(&cur);	/* decode & print instruction */
 			exec(&cur);		/* "execute" */
@@ -109,6 +140,8 @@ int main(int argc, char** argv)
 		}
 
 		cycles++;
+		if (limits[LIM_C] != -1 && cycles >= limits[LIM_C])
+			break;
 
 		if (cur.val._u32 == 0xffffffff)	// exit
 			break;
