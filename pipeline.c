@@ -51,19 +51,15 @@ void do_cycle(void)
  * This auxiliar function is executed every time a cycle is wasted waiting for
  * the pipeline while it is fetching and decoding
  */
-void wait_pipe(void)
+int wait_pipe(void)
 {
-	fprintf(stdout, "\t(waiting for pipeline: pc %d stage %d)\n", *pc, stage);
+	int ready = (stage == STAGES-1);
+	if (!ready) {
+		fprintf(stdout, "\t(waiting for pipeline: pc %d stage %d)\n", *pc, stage);
+		do_cycle();
+	}
+	return ready;
 }
-
-
-/*
- * Set what instruction is pointing each of the pipeline stages
- */
-//void update_pipe(void)
-//{
-//	executing = *pc-8;
-//}
 
 
 /*
@@ -72,7 +68,7 @@ void wait_pipe(void)
 void jmp(u32 new_pc)
 {
 	*pc = new_pc;
-	printf("pc is rait nao %d\n", *pc);
+//	printf("pc is nao %d\n", *pc);
 	stage = 0;
 }
 
@@ -83,20 +79,9 @@ void jmp(u32 new_pc)
 void b(s32 offset)
 {
 	da_addr_t off = da_instr_branch_target(offset, *pc);
-	printf("b: offset=%d(%x), *pc=%d(%x), off=%d(%x)\n", offset, offset, *pc, *pc, off, off);
-//	jmp(*pc + 4*offset);
-	jmp(off);
+//	printf("b: offset=%d(%x), *pc=%d(%x), off=%d(%x)\n", offset, offset, *pc, *pc, off, off);
+	jmp(off-8);
 }
-
-
-/*
- * Add 4 to pc and update pipeline in consequence
- */
-//void next_inst(void)
-//{
-//	*pc += 4;
-//	stage_up();
-//}
 
 
 /*
@@ -106,13 +91,3 @@ u32 cur_inst(void)
 {
 	return *pc-8;
 }
-
-
-/*
- * Check wether the pipe has fetched and decoded the current instruction
- */
-int pipe_ready(void)
-{
-	return stage == STAGES-1;
-}
-

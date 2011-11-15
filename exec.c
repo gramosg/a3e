@@ -64,7 +64,6 @@ void exec_swi(da_args_swi_t *args)
 
 void exec_bl(da_args_bl_t *args)
 {
-	printf("offset=%d(%x)\n", args->off, args->off);
 	b(args->off);
 }
 
@@ -78,10 +77,12 @@ void exec(struct instruction *inst)
 	case DA_GROUP_DATA_IMM:
 //		printf("Entering data_imm\n");
 		exec_data_imm(&args.data_imm);
+		do_cycle();
 		break;
 	case DA_GROUP_SWI:
 //		printf("Entering swi\n");
 		exec_swi(&args.swi);
+		do_cycle();
 		break;
 	case DA_GROUP_BL:
 //		printf("Entering group_bl\n");
@@ -90,9 +91,11 @@ void exec(struct instruction *inst)
 	case DA_GROUP_DATA_IMM_SH:
 //		printf("Entering data_imm_sh\n");
 		exec_data_imm_sh(&args.data_imm_sh);
+		do_cycle();
 		break;
 	default:
 		printf("\t--> NOT EXECUTED\n");
+		do_cycle();
 		break;
 	}
 

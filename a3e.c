@@ -101,16 +101,12 @@ int main(int argc, char** argv)
 	while (1) {
 
 		/* If pipe is ready to execute an instruction, do it */
-		if (pipe_ready()) {
+		if (wait_pipe()) {
 			instr_n += 1;		/* Executing one more instruction */
 			memcpy(cur.val._byte, m + cur_inst(), 4);	/* "fetch" */
 			parse(&cur);	/* decode & print instruction */
-			exec(&cur);			/* "execute" */
-		} else {
-			wait_pipe();
+			exec(&cur);		/* "execute" */
 		}
-
-		do_cycle();
 
 		if (cur.val._u32 == 0xffffffff)	// exit
 			break;
