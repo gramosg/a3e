@@ -22,6 +22,7 @@
 #define _TYPES_H
 
 
+#include <libdisarm/disarm.h>
 #include <stdint.h>
 
 typedef uint32_t u32;
@@ -31,31 +32,15 @@ typedef int32_t s32;
 typedef int16_t s16;
 typedef int8_t s8;
 
-enum inst_type {
-	MOV,MUL,LML,SWP,LDB,LDM,B,BXC,COP,SWI,UNK,BYE,NONE
-};
-
 struct instruction {
 	union {
 		u8 _byte[4];
 		u32 _u32;
 	} val;
 
-	enum inst_type type;
-	void *info;		// struct <type>_info
-	u8 cond;
+	da_group_t group;
+	da_instr_args_t args;
 };
-
-
-enum mov_type {
-	add,adc,sub,sbc,rsb,rsc,cmp,cmn,tst,teq,and,eor,orr,bic,mov,mvn,lsl,lsr,
-	ror,rol,rrx
-};
-
-struct mov_info {
-	enum mov_type op;
-};
-
 
 extern u32 get_u32(u32 base, u8 from, u8 size);
 extern s32 get_s32(u32 base, u8 from, u8 size);

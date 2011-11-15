@@ -22,7 +22,6 @@
 #define _PARSER_H
 
 
-extern void printi(struct instruction *inst);
 extern void parse(struct instruction *inst);
 
 
