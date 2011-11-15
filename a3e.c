@@ -51,7 +51,7 @@ static void error(char *s)
 
 static void usage(char *progname)
 {
-	printf("Usage: %s <file>\n", progname);
+	printf("Usage: %s [-v|--verbose] [-c|--max-cycles] [-i|--max-inst] <file>\n", progname);
 	exit(0);
 }
 
@@ -70,21 +70,23 @@ int main(int argc, char** argv)
 	struct sigaction act, oact;
 	int codefile, arg;
 	int instrn = 0, cycles = 0;
-	u16 codelen;
+	int verbose = 0;
+	int codelen;
 	void *map;
 	int limits[] = {-1, -1};
 
 	int opt = 0;
 	struct option options[] = {
-		{"version", no_argument, NULL, 'v'},
+		{"help", no_argument, NULL, 'h'},
+		{"verbose", no_argument, NULL, 'v'},
 		{"max-cycles", required_argument, NULL, 'c'},
 		{"max-inst", required_argument, NULL, 'i'},
+//		{"memsize", required_argument, NULL, 'm'},
 		{0, 0, 0, 0}
 	};
 
-
 	while (opt != -1) {
-		switch (opt = getopt_long(argc, argv, "vc:i:", options, NULL)) {
+		switch (opt = getopt_long(argc, argv, "hvc:i:", options, NULL)) {
 		case -1:
 			break;
 		case 'i':
@@ -96,10 +98,21 @@ int main(int argc, char** argv)
 				limits[LIM_C] = arg;
 			break;
 		case 'v':
+			verbose = 1;
+			break;
+//		case 'm':
+//			if ((arg = atoi(optarg)) > 0)
+//				memsize = arg;
+//			break;
+		case 'h':
 		case '?':
 			usage(argv[0]);
 		}
 	}
+
+	// There must be only one parameter not parsed by getopt: the file name
+	if (optind != argc-1)
+		usage(argv[0]);
 
 	act.sa_handler = segfault;
 
@@ -113,7 +126,8 @@ int main(int argc, char** argv)
 		codelen = codelen - (codelen % 4) + 4;
 	}
 
-	printf("Memory size: %d bytes\n", MEMSIZE);
+	if (verbose)
+		printf("Memory size: %d bytes\n", MEMSIZE);
 	if (MEMSIZE < codelen + 4)
 		error("not enough memory");
 
@@ -126,29 +140,34 @@ int main(int argc, char** argv)
 
 	sigaction(SIGSEGV, &act, &oact);
 
-	printf("\nGo go go...\n");
+	if (verbose)
+		printf("Beginning execution...\n");
+
 	while (1) {
+
+		if (limits[LIM_C] >= 0 && cycles >= limits[LIM_C])
+			break;
+		if (limits[LIM_I] >= 0 && instrn >= limits[LIM_I])
+			break;
+		cycles++;
 
 		/* If pipe is ready to execute an instruction, do it */
 		if (wait_pipe()) {
-			if (limits[LIM_I] != -1 && instrn >= limits[LIM_I])
-				break;
 			memcpy(cur.val._byte, m + cur_inst(), 4);	/* "fetch" */
 			parse(&cur);	/* decode & print instruction */
+			if (cur.val._u32 == 0xffffffff)	{ // exit
+				cycles--;
+				break;
+			}
 			exec(&cur);		/* "execute" */
 			instrn++;		/* Executing one more instruction */
 		}
 
-		cycles++;
-		if (limits[LIM_C] != -1 && cycles >= limits[LIM_C])
-			break;
-
-		if (cur.val._u32 == 0xffffffff)	// exit
-			break;
 	}
 
-	printf("\nExecution finished. Instructions: %d, cycles: %d\n", instrn-1, cycles-1);
-	show_status();
+	printf("\nExecution finished OK. Instructions: %d, cycles: %d\n", instrn, cycles);
+	if (verbose)
+		show_status();
 
 	return 0;
 }

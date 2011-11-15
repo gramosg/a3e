@@ -55,7 +55,7 @@ int wait_pipe(void)
 {
 	int ready = (stage == STAGES-1);
 	if (!ready) {
-		fprintf(stdout, "\t(waiting for pipeline: pc %d stage %d)\n", *pc, stage);
+		fprintf(stdout, "\t(waiting for pipeline: pc=%d, stage=%d)\n", *pc, stage);
 		do_cycle();
 	}
 	return ready;
@@ -68,7 +68,6 @@ int wait_pipe(void)
 void jmp(u32 new_pc)
 {
 	*pc = new_pc;
-//	printf("pc is nao %d\n", *pc);
 	stage = 0;
 }
 
@@ -79,7 +78,6 @@ void jmp(u32 new_pc)
 void b(s32 offset)
 {
 	da_addr_t off = da_instr_branch_target(offset, *pc);
-//	printf("b: offset=%d(%x), *pc=%d(%x), off=%d(%x)\n", offset, offset, *pc, *pc, off, off);
 	jmp(off-8);
 }
 

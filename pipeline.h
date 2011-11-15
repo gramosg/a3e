@@ -24,10 +24,10 @@
 
 #include "types.h"
 
+extern void do_cycle(void);
 extern int wait_pipe(void);
 extern void jmp(u32 new_pc);
 extern void b(u32 offset);
-extern void do_cycle(void);
 extern u32 cur_inst(void);
 
 
