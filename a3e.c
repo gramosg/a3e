@@ -153,7 +153,10 @@ int main(int argc, char** argv)
 		/* If pipe is ready to execute an instruction, do it */
 		if ((cur_pos = fetch(verbose)) != -1) {
 			memcpy(cur.val._byte, m + cur_pos, 4);	/* "fetch" */
-			exec(&cur);		/* "execute" */
+			if (exec(&cur) == -1) {		/* parse and execute */
+				cycles--;
+				break;
+			}
 			instrn++;		/* Executing one more instruction */
 		}
 

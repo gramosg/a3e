@@ -89,9 +89,10 @@ void exec_bl(da_args_bl_t *args)
 
 int exec(struct instruction *inst)
 {
-	da_instr_args_t args = inst->args;
+	da_instr_args_t args;
 
 	parse(inst);
+	args = inst->args;
 
 	if (inst->val._u32 == 0xffffffff)	{ // exit
 		return -1;
