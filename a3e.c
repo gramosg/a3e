@@ -68,7 +68,7 @@ int main(int argc, char** argv)
 {
 	struct instruction cur;
 	struct sigaction act, oact;
-	int codefile, arg;
+	int codefile, arg, cur_pos;
 	int instrn = 0, cycles = 0;
 	int verbose = 0;
 	int codelen;
@@ -141,7 +141,7 @@ int main(int argc, char** argv)
 	sigaction(SIGSEGV, &act, &oact);
 
 	if (verbose)
-		printf("Beginning execution...\n");
+		printf("Beginning execution...\n-------------------------------\n\n");
 
 	while (1) {
 
@@ -152,8 +152,8 @@ int main(int argc, char** argv)
 		cycles++;
 
 		/* If pipe is ready to execute an instruction, do it */
-		if (wait_pipe()) {
-			memcpy(cur.val._byte, m + cur_inst(), 4);	/* "fetch" */
+		if ((cur_pos = fetch(verbose)) != -1) {
+			memcpy(cur.val._byte, m + cur_pos, 4);	/* "fetch" */
 			parse(&cur);	/* decode & print instruction */
 			if (cur.val._u32 == 0xffffffff)	{ // exit
 				cycles--;

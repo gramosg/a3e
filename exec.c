@@ -28,7 +28,7 @@
 
 inline void not_implemented(char *where, da_data_op_t op)
 {
-	fprintf(stderr, "\tOp #%d not implemented in inst. type %s\n", op, where);
+	fprintf(stdout, "\tOp #%d not implemented in inst. type %s\n", op, where);
 }
 
 void exec_data_imm(da_args_data_imm_t *args)
@@ -58,47 +58,39 @@ void exec_swi(da_args_swi_t *args)
 		r[1] = syscall(r[7], r[0], r[1], r[2], r[3], r[4]);
 		printf("\t--> returned %d\n", r[1]);
 	} else {
-		fprintf(stderr, "Syscall %x not implemented\n", nr);
+		fprintf(stderr, "Software interrupt #%x not implemented\n", nr);
 	}
 }
 
 void exec_bl(da_args_bl_t *args)
 {
-	b(args->off);
+	b(args->off - 1);
 }
 
 void exec(struct instruction *inst)
 {
 	da_instr_args_t args = inst->args;
 
-	if (inst->val._u32 == 0xffffffff)
-		return;
 	switch (inst->group) {
 	case DA_GROUP_DATA_IMM:
 //		printf("Entering data_imm\n");
 		exec_data_imm(&args.data_imm);
-		do_cycle();
 		break;
 	case DA_GROUP_SWI:
 //		printf("Entering swi\n");
 		exec_swi(&args.swi);
-		do_cycle();
 		break;
 	case DA_GROUP_BL:
 //		printf("Entering group_bl\n");
 		exec_bl(&args.bl);
-		break;
+		break;;
 	case DA_GROUP_DATA_IMM_SH:
 //		printf("Entering data_imm_sh\n");
 		exec_data_imm_sh(&args.data_imm_sh);
-		do_cycle();
 		break;
 	default:
 		printf("\t--> NOT EXECUTED\n");
-		do_cycle();
 		break;
 	}
-
-	return;
 }
 

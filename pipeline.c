@@ -34,31 +34,23 @@ int stage = 0;
 
 
 /*
- * Advance one stage in pipeline status
- *
- * This is done to prevent the main program from executing invalid instructions
- * when a jump/branch has been taken or the program is first run
+ * Check if pipeline is ready to execute an instruction, and return its
+ * direction (or -1). Then, update pc and pipeline stage.
  */
-void do_cycle(void)
+int fetch(int verbose)
 {
+	int ret = -1;
+
+	if (stage == STAGES-1)
+		ret = *pc-8;
+	else if (verbose)
+		printf("\t(waiting for pipeline: pc=%d, stage=%d)\n", *pc, stage);
+
 	*pc += 4;
 	if (stage < STAGES-1)
 		stage++;
-}
 
-
-/*
- * This auxiliar function is executed every time a cycle is wasted waiting for
- * the pipeline while it is fetching and decoding
- */
-int wait_pipe(void)
-{
-	int ready = (stage == STAGES-1);
-	if (!ready) {
-		fprintf(stdout, "\t(waiting for pipeline: pc=%d, stage=%d)\n", *pc, stage);
-		do_cycle();
-	}
-	return ready;
+	return ret;
 }
 
 
@@ -79,13 +71,4 @@ void b(s32 offset)
 {
 	da_addr_t off = da_instr_branch_target(offset, *pc);
 	jmp(off-8);
-}
-
-
-/*
- * Instruction being currently executed: pc-8
- */
-u32 cur_inst(void)
-{
-	return *pc-8;
 }

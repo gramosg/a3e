@@ -24,11 +24,9 @@
 
 #include "types.h"
 
-extern void do_cycle(void);
-extern int wait_pipe(void);
+extern int fetch(int verbose);
 extern void jmp(u32 new_pc);
 extern void b(u32 offset);
-extern u32 cur_inst(void);
 
 
 #endif	/* _PIPELINE_H */
