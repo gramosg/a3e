@@ -3,7 +3,7 @@ CC = clang
 CFLAGS = -Wall -Wextra -std=gnu99 -pedantic -O3
 LDFLAGS = -ldisarm
 TARGET = a3e
-OBJECTS = $(TARGET).o exec.o memory.o parser.o pipeline.o types.o
+OBJECTS = $(TARGET).o exec.o memory.o parser.o pipeline.o
 PREFIX=/usr/local/bin
 
 %.o: %.c
