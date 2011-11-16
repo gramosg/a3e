@@ -24,7 +24,6 @@
 
 #include "types.h"
 
-extern void parse(struct instruction *);
 extern int exec(struct instruction *);
 
 

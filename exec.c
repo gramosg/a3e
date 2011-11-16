@@ -87,9 +87,15 @@ void exec_bl(da_args_bl_t *args)
 	b(args->off - 1);
 }
 
-void exec(struct instruction *inst)
+int exec(struct instruction *inst)
 {
 	da_instr_args_t args = inst->args;
+
+	parse(inst);
+
+	if (inst->val._u32 == 0xffffffff)	{ // exit
+		return -1;
+	}
 
 	switch (inst->group) {
 	case DA_GROUP_DATA_IMM:
@@ -112,5 +118,7 @@ void exec(struct instruction *inst)
 		printf("\t--> NOT EXECUTED\n");
 		break;
 	}
+
+	return 0;
 }
 
