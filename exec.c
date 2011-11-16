@@ -26,6 +26,26 @@
 #include "memory.h"
 #include "pipeline.h"
 
+void parse(struct instruction *inst)
+{
+	da_instr_t i;
+
+	if (inst->val._u32 == 0xffffffff) {
+		printf(".exit\n");
+		return;
+	}
+
+	da_instr_parse(&i, inst->val._u32, 0);
+	da_instr_parse_args(&inst->args, &i);
+	printf("%x\t", inst->val._u32);
+	da_instr_fprint(stdout, &i, &inst->args, 0);
+
+	inst->group = i.group;
+	inst->cond = da_instr_get_cond(&i);
+
+	putchar('\n');
+}
+
 inline void not_implemented(char *where, da_data_op_t op)
 {
 	fprintf(stdout, "\tOp #%d not implemented in inst. type %s\n", op, where);

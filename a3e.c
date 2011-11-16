@@ -31,7 +31,6 @@
 #include "types.h"
 #include "memory.h"
 #include "exec.h"
-#include "parser.h"
 #include "pipeline.h"
 
 #define LIM_I		0
