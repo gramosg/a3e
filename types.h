@@ -43,9 +43,6 @@ struct instruction {
 	da_instr_args_t args;
 };
 
-extern u32 get_u32(u32 base, u8 from, u8 size);
-extern s32 get_s32(u32 base, u8 from, u8 size);
-
 
 #endif	/* _TYPES_H */
 
